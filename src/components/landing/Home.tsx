@@ -1,7 +1,7 @@
 import React from "react";
-import Header from "../components/Header";
-import Footer from "../components/Footer";
-import Button from "./Button";
+import Header from "../common/Header";
+import Footer from "../common/Footer";
+import Button from "../common/Button";
 import { useNavigate } from "react-router-dom";
 
 const Home: React.FC = () => {
