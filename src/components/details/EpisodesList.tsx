@@ -3,18 +3,20 @@ import { IEpisode } from "../../types/IEpisode";
 import Button from "../common/Button";
 
 interface IProps {
-  data: IEpisode[];
+  data: IEpisode[] | IEpisode;
 }
 
 const EpisodesList: React.FC<IProps> = ({ data }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12;
 
+  const episodesData = Array.isArray(data) ? data : [data];
+
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-  const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
+  const currentItems = episodesData.slice(indexOfFirstItem, indexOfLastItem);
 
-  const totalPages = Math.ceil(data.length / itemsPerPage);
+  const totalPages = Math.ceil(episodesData.length / itemsPerPage);
 
   const handleNextPage = () => {
     if (currentPage < totalPages) {
@@ -28,8 +30,12 @@ const EpisodesList: React.FC<IProps> = ({ data }) => {
     }
   };
 
-  if (!data || data.length === 0) {
-    return <div>No episodes available.</div>;
+  if (!episodesData || episodesData.length === 0) {
+    return (
+      <div className="text-center text-gray-700 text-lg font-medium my-8">
+        No episodes available.
+      </div>
+    );
   }
 
   return (
@@ -54,31 +60,33 @@ const EpisodesList: React.FC<IProps> = ({ data }) => {
           </div>
         ))}
       </div>
-      <div className="flex justify-center items-center space-x-4 mt-8">
-        <Button
-          title="Previous"
-          onClick={handlePreviousPage}
-          disabled={currentPage === 1}
-          className={`px-4 py-2 text-white bg-sky-800 rounded ${
-            currentPage === 1
-              ? "opacity-50 cursor-not-allowed"
-              : "hover:bg-sky-900"
-          }`}
-        />
-        <span className="text-gray-700">
-          Page {currentPage} of {totalPages}
-        </span>
-        <Button
-          onClick={handleNextPage}
-          title="Next"
-          disabled={currentPage === totalPages}
-          className={`px-4 py-2 text-white bg-sky-800 rounded ${
-            currentPage === totalPages
-              ? "opacity-50 cursor-not-allowed"
-              : "hover:bg-sky-900"
-          }`}
-        />
-      </div>
+      {currentItems && currentItems.length > 0 && (
+        <div className="flex justify-center items-center space-x-4 mt-8">
+          <Button
+            title="Previous"
+            onClick={handlePreviousPage}
+            disabled={currentPage === 1}
+            className={`px-4 py-2 text-white bg-sky-800 rounded ${
+              currentPage === 1
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:bg-sky-900"
+            }`}
+          />
+          <span className="text-gray-700">
+            Page {currentPage} of {totalPages}
+          </span>
+          <Button
+            onClick={handleNextPage}
+            title="Next"
+            disabled={currentPage === totalPages}
+            className={`px-4 py-2 text-white bg-sky-800 rounded ${
+              currentPage === totalPages
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:bg-sky-900"
+            }`}
+          />
+        </div>
+      )}
     </>
   );
 };

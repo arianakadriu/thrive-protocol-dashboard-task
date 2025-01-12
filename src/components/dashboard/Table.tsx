@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { IPagination } from "../../types/IPagination";
 import TableRow from "../common/TableRow";
 import { useCharacterContext } from "../../context/CharacterContext";
+import Modal from "../common/Modal";
 
 interface IProps {
   characters: ICharacter[];
@@ -40,6 +41,12 @@ const Table: React.FC<IProps> = ({
   const [selectAll, setSelectAll] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isFavoriteModalOpen, setIsFavoriteModalOpen] = useState(false);
+  const [isMultiFavoriteModalOpen, setIsMultiFavoriteModalOpen] =
+    useState(false);
+  const [characterToFavorite, setCharacterToFavorite] = useState<number | null>(
+    null
+  );
   const [disabledRows, setDisabledRows] = useState<number[]>([]);
   const speciesArray: string[] = [
     "alien",
@@ -126,23 +133,6 @@ const Table: React.FC<IProps> = ({
 
       setSelectedRows(new Array(characters.length).fill(false));
       setSelectAll(false);
-    }
-  };
-
-  const favoriteCharacter = (characterId?: number) => {
-    let selectedCharacterIds: number[] = [];
-
-    if (characterId) {
-      selectedCharacterIds = [characterId];
-    } else {
-      selectedCharacterIds = characters
-        .filter((_, index) => selectedRows[index])
-        .map((character) => character.id);
-    }
-
-    if (selectedCharacterIds.length > 0) {
-      favoriteRowsAction(selectedCharacterIds);
-      console.log("Selected favorite IDs:", selectedCharacterIds);
     }
   };
 
@@ -240,6 +230,65 @@ const Table: React.FC<IProps> = ({
     paginationData?.count || 0
   );
 
+  const favoriteCharacter = (characterId?: number) => {
+    setCharacterToFavorite(characterId ? characterId : null);
+    if (characterId) {
+      setIsFavoriteModalOpen(true);
+    } else {
+      setIsMultiFavoriteModalOpen(true);
+    }
+  };
+
+  const getModalTitle = () => {
+    if (characterToFavorite && isFavorite(characterToFavorite)) {
+      return "Unfavorite";
+    }
+    return "Favorite";
+  };
+
+  const getMultiFavoriteModalTitle = () => {
+    const selectedCharacterIds = characters
+      .filter((_, index) => selectedRows[index])
+      .map((character) => character.id);
+
+    const allSelectedFavorited = selectedCharacterIds.every((id) =>
+      isFavorite(id)
+    );
+
+    if (allSelectedFavorited) {
+      return "Unfavorite";
+    }
+    return "Favorite";
+  };
+
+  const onFavoriteModalCancel = () => {
+    setCharacterToFavorite(null);
+    setIsFavoriteModalOpen(false);
+    setIsMultiFavoriteModalOpen(false);
+  };
+
+  const onFavoriteModalConfirm = () => {
+    let selectedCharacterIds: number[] = [];
+
+    if (characterToFavorite) {
+      selectedCharacterIds = [characterToFavorite];
+    } else {
+      selectedCharacterIds = characters
+        .filter((_, index) => selectedRows[index])
+        .map((character) => character.id);
+    }
+
+    if (selectedCharacterIds.length > 0) {
+      favoriteRowsAction(selectedCharacterIds);
+    }
+
+    if (characterToFavorite) {
+      setIsFavoriteModalOpen(false);
+    } else {
+      setIsMultiFavoriteModalOpen(false);
+    }
+  };
+
   return (
     <>
       <div className="flex flex-col sm:flex-row justify-between sm:items-center py-4">
@@ -270,7 +319,7 @@ const Table: React.FC<IProps> = ({
         </div>
 
         {selectedCount > 1 && (
-          <div className="flex gap-4 justify-center mt-2 sm:mt-0">
+          <div className="flex space-x-2 justify-center mt-2 sm:mt-0 sm:mr-6">
             <i
               className="bi bi-heart text-lg cursor-pointer text-red-600"
               onClick={() => favoriteCharacter()}
@@ -467,6 +516,20 @@ const Table: React.FC<IProps> = ({
             </li>
           </ul>
         </nav>
+        <Modal
+          isOpen={isFavoriteModalOpen}
+          title={`${getModalTitle()} Character`}
+          description={`Are you sure you want to ${getModalTitle().toLowerCase()} this character?`}
+          onClose={onFavoriteModalCancel}
+          onConfirm={onFavoriteModalConfirm}
+        />
+        <Modal
+          isOpen={isMultiFavoriteModalOpen}
+          title={`${getMultiFavoriteModalTitle()} Characters`}
+          description={`Are you sure you want to ${getMultiFavoriteModalTitle().toLowerCase()} these characters?`}
+          onClose={onFavoriteModalCancel}
+          onConfirm={onFavoriteModalConfirm}
+        />
       </div>
     </>
   );

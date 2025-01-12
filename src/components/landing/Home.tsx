@@ -3,6 +3,7 @@ import Header from "../common/Header";
 import Footer from "../common/Footer";
 import Button from "../common/Button";
 import { useNavigate } from "react-router-dom";
+import FavoriteCharacters from "./FavoriteCharacters";
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
@@ -19,11 +20,12 @@ const Home: React.FC = () => {
             Welcome to the Rick and Morty Dashboard
           </h1>
           <p className="text-lg text-gray-600 mb-6">
-            Explore the world of Rick and Morty episodes! Search, filter, and
-            view episode details in a responsive dashboard. Get started by
-            clicking below to access the full episode list.
+            Explore the world of Rick and Morty characters! Search, filter, favorite and
+            view character details in a responsive dashboard. Get started by
+            clicking below to access the full character list.
           </p>
           <Button title="Go to Dashboard" onClick={redirectToDashboard} />
+          <FavoriteCharacters />
         </div>
       </main>
       <Footer />

@@ -41,6 +41,28 @@ export const getAllCharacters = async (filters: CharacterFilters = {}) => {
   }
 };
 
+export const getMultipleCharacters = async (characters: number[]) => {
+  try {
+    const url = `${CHARACTERS_URL}/${characters}`;
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error("Failed to fetch characters");
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error(error);
+    throw error;
+  }
+};
+
 export const getCharacterById = async (id: string) => {
   try {
     const url = `${CHARACTERS_URL}/${id}`;
@@ -74,7 +96,7 @@ export const getCharacterEpisodes = async (episodes: number[]) => {
     });
 
     if (!response.ok) {
-      throw new Error("Failed to fetch character");
+      throw new Error("Failed to fetch character episodes");
     }
 
     const data = await response.json();

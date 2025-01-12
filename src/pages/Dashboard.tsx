@@ -4,6 +4,7 @@ import Footer from "../components/common/Footer";
 import Table from "../components/dashboard/Table";
 import { getAllCharacters } from "../services/characters";
 import { ICharacters } from "../types/ICharacters";
+import LoadingSpinner from "../components/common/LoadingSpinner";
 
 const Dashboard: React.FC = () => {
   const [characters, setCharacters] = useState<ICharacters>();
@@ -39,11 +40,7 @@ const Dashboard: React.FC = () => {
   }, [pageNumber, searchFilters]);
 
   if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>{error}</div>;
+    return <LoadingSpinner/>;
   }
 
   const handleOnPageChange = (page: number) => {
@@ -61,8 +58,15 @@ const Dashboard: React.FC = () => {
     <div className="flex flex-col min-h-screen">
       <Header />
       <main className="flex-grow p-6">
+      {error ? (
+          <div className="max-w-7xl mx-auto text-center">
+            <div className="text-xl text-red-600 font-semibold">Error:</div>
+            <div className="text-center text-lg text-gray-700 mt-2">
+              {error || "Data not found"}
+            </div>
+          </div>
+        ) : (
         <div className="max-w-7xl mx-auto text-center">
-          <h2 className="text-xl font-semibold mb-4 flex">Dashboard</h2>
           <Table
             characters={characters?.results || []}
             paginationData={characters?.info}
@@ -73,6 +77,7 @@ const Dashboard: React.FC = () => {
             fetchPageData={handleOnPageChange}
           />
         </div>
+        )}
       </main>
       <Footer />
     </div>

@@ -50,9 +50,9 @@ const ProfileInformation: React.FC<IProps> = ({ profile }) => {
     setIsEditing(false);
   };
 
-  if (!profile) {
-    return <div>No profile information available.</div>;
-  }
+  // if (!profile) {
+  //   return <div>No profile information available.</div>;
+  // }
 
   return (
     <div className="max-w-lg mx-auto bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">

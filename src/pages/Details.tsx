@@ -7,6 +7,7 @@ import EpisodesList from "../components/details/EpisodesList";
 import { IEpisode } from "../types/IEpisode";
 import Header from "../components/common/Header";
 import Footer from "../components/common/Footer";
+import LoadingSpinner from "../components/common/LoadingSpinner";
 
 const Details: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -39,25 +40,27 @@ const Details: React.FC = () => {
   }, [id]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <LoadingSpinner/>;
   }
 
-  if (error) {
-    return <div>{error}</div>;
-  }
-
-  if (!character) {
-    return <div>Character not found</div>;
-  }
 
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
       <main className="flex-grow p-6 my-4">
-      <div className="max-w-7xl mx-auto text-center">
-      <ProfileInformation profile={character}/>
-      <EpisodesList data={episodesList || []}/>
-      </div>
+        {error || !character ? (
+          <div className="max-w-7xl mx-auto text-center">
+            <div className="text-xl text-red-600 font-semibold">Error:</div>
+            <div className="text-center text-lg text-gray-700 mt-2">
+              {error || "Character not found"}
+            </div>
+          </div>
+        ) : (
+          <div className="max-w-7xl mx-auto text-center">
+            <ProfileInformation profile={character} />
+            <EpisodesList data={episodesList || []} />
+          </div>
+        )}
       </main>
       <Footer />
     </div>
