@@ -3,8 +3,8 @@ import { ICharacter } from "../../types/ICharacter";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import { useNavigate } from "react-router-dom";
 import { IPagination } from "../../types/IPagination";
-import { useTableContext } from "../../context/TableContext";
 import TableRow from "../common/TableRow";
+import { useCharacterContext } from "../../context/CharacterContext";
 
 interface IProps {
   characters: ICharacter[];
@@ -31,7 +31,7 @@ const Table: React.FC<IProps> = ({
     // deleteRows,
     favoriteRowsAction,
     favoriteRows,
-  } = useTableContext();
+  } = useCharacterContext();
 
   const [selectedRows, setSelectedRows] = useState<boolean[]>(
     new Array(characters.length).fill(false)
@@ -95,8 +95,8 @@ const Table: React.FC<IProps> = ({
     );
   });
 
-  const editCharacter = () => {
-    navigate("/dashboard");
+  const editCharacter = (id: number) => {
+    navigate(`/details/${id}`);
   };
 
   const deleteCharacter = (characterId?: number) => {

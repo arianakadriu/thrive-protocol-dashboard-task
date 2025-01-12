@@ -9,7 +9,7 @@ interface IProps {
   handleRowSelect: (index: number) => void;
   isFavorite: (id: number) => boolean;
   favoriteCharacter: (id: number) => void;
-  editCharacter: () => void;
+  editCharacter: (id: number) => void;
   deleteCharacter: (id: number) => void;
 }
 
@@ -79,7 +79,7 @@ const TableRow: React.FC<IProps> = ({
           ></i>
           <i
             className="bi bi-pencil text-lg cursor-pointer text-gray-700"
-            onClick={editCharacter}
+            onClick={() => editCharacter(character.id)}
           ></i>
           <i
             className="bi bi-trash text-lg cursor-pointer text-gray-700"
