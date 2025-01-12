@@ -10,26 +10,22 @@ const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [pageNumber, setPageNumber] = useState<number>(1);
-  const [searchText, setSearchText] = useState<string>("");
-  const [searchSpeciesText, setSearchSpeciesText] = useState<string>("");
-  const [searchStatusText, setSearchStatusText] = useState<string>("");
-  const [searchGenderText, setSearchGenderText] = useState<string>("");
+  const [searchFilters, setSearchFilters] = useState({
+    name: "",
+    species: "",
+    gender: "",
+    status: "",
+  });
 
   useEffect(() => {
-    const fetchCharacters = async (
-      pageNumber: number,
-      searchText: string,
-      searchSpeciesText: string,
-      searchGenderText: string,
-      searchStatusText: string
-    ) => {
+    const fetchCharacters = async () => {
       try {
         const charactersData = await getAllCharacters({
           page: pageNumber,
-          name: searchText,
-          species: searchSpeciesText,
-          gender: searchGenderText,
-          status: searchStatusText,
+          name: searchFilters.name,
+          species: searchFilters.species,
+          gender: searchFilters.gender,
+          status: searchFilters.status,
         });
         setCharacters(charactersData);
       } catch (error) {
@@ -38,20 +34,8 @@ const Dashboard: React.FC = () => {
         setLoading(false);
       }
     };
-    fetchCharacters(
-      pageNumber,
-      searchText,
-      searchSpeciesText,
-      searchGenderText,
-      searchStatusText
-    );
-  }, [
-    pageNumber,
-    searchText,
-    searchSpeciesText,
-    searchGenderText,
-    searchStatusText,
-  ]);
+    fetchCharacters();
+  }, [pageNumber, searchFilters]);
 
   if (loading) {
     return <div>Loading...</div>;
@@ -65,17 +49,11 @@ const Dashboard: React.FC = () => {
     setPageNumber(page);
   };
 
-  const handleOnSearchNameChange = (searchText: string) => {
-    setSearchText(searchText);
-  };
-  const handleOnSearchGenderChange = (searchText: string) => {
-    setSearchGenderText(searchText);
-  };
-  const handleOnSearchSpeciesChange = (searchText: string) => {
-    setSearchSpeciesText(searchText);
-  };
-  const handleOnSearchStatusChange = (searchText: string) => {
-    setSearchStatusText(searchText);
+  const handleOnSearchChange = (field: string, value: string) => {
+    setSearchFilters((prevFilters) => ({
+      ...prevFilters,
+      [field]: value,
+    }));
   };
 
   return (
@@ -87,10 +65,10 @@ const Dashboard: React.FC = () => {
           <Table
             characters={characters?.results || []}
             paginationData={characters?.info}
-            onSearchName={handleOnSearchNameChange}
-            onSearchGender={handleOnSearchGenderChange}
-            onSearchSpecies={handleOnSearchSpeciesChange}
-            onSearchStatus={handleOnSearchStatusChange}
+            onSearchName={(value) => handleOnSearchChange("name", value)}
+            onSearchGender={(value) => handleOnSearchChange("gender", value)}
+            onSearchSpecies={(value) => handleOnSearchChange("species", value)}
+            onSearchStatus={(value) => handleOnSearchChange("status", value)}
             fetchPageData={handleOnPageChange}
           />
         </div>

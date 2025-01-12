@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import { ICharacter } from "../../types/ICharacter";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import { useNavigate } from "react-router-dom";
@@ -15,6 +15,8 @@ interface IProps {
   onSearchStatus: (query: string) => void;
   onSearchGender: (query: string) => void;
 }
+
+type SortDirection = "asc" | "desc";
 
 const Table: React.FC<IProps> = ({
   characters,
@@ -52,6 +54,46 @@ const Table: React.FC<IProps> = ({
   const genderArray: string[] = ["male", "female", "genderless"];
   const statusArray: string[] = ["alive", "dead"];
   const navigate = useNavigate();
+
+  const [sortColumn, setSortColumn] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+
+  const handleSort = (column: string) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
+    } else {
+      setSortColumn(column);
+      setSortDirection("asc");
+    }
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const getValue = (obj: any, path: string) => {
+    return path.split(".").reduce((acc, key) => acc?.[key], obj);
+  };
+
+  const sortedCharacters = [...characters].sort((a, b) => {
+    if (!sortColumn) return 0;
+
+    const aValue = getValue(a, sortColumn);
+    const bValue = getValue(b, sortColumn);
+    console.log(
+      "ep",
+      aValue,
+      bValue,
+      (aValue < bValue ? -1 : aValue > bValue ? 1 : 0) *
+        (sortDirection === "asc" ? 1 : -1)
+    );
+
+    // Handle undefined values by placing them at the end or beginning depending on the sort direction
+    if (aValue === undefined) return sortDirection === "asc" ? 1 : -1;
+    if (bValue === undefined) return sortDirection === "asc" ? -1 : 1;
+
+    return (
+      (aValue < bValue ? -1 : aValue > bValue ? 1 : 0) *
+      (sortDirection === "asc" ? 1 : -1)
+    );
+  });
 
   const editCharacter = () => {
     navigate("/dashboard");
@@ -101,8 +143,6 @@ const Table: React.FC<IProps> = ({
     if (selectedCharacterIds.length > 0) {
       favoriteRowsAction(selectedCharacterIds);
       console.log("Selected favorite IDs:", selectedCharacterIds);
-    } else {
-      console.log("No characters selected for favorites");
     }
   };
 
@@ -132,27 +172,33 @@ const Table: React.FC<IProps> = ({
     fetchPageData(page);
   };
 
-  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const query = event.target.value;
-    setSearchQuery(query);
-  };
+  const handleSearchSubmit = useCallback(() => {
+    const query = searchQuery.trim().toLowerCase();
 
-  const handleSearchSubmit = () => {
-    console.log("species", searchQuery);
     onSearchSpecies("");
     onSearchStatus("");
     onSearchGender("");
     onSearchName("");
 
-    if (speciesArray.includes(searchQuery.toLowerCase())) {
-      onSearchSpecies(searchQuery);
-    } else if (statusArray.includes(searchQuery.toLowerCase())) {
-      onSearchStatus(searchQuery);
-    } else if (genderArray.includes(searchQuery.toLowerCase())) {
-      onSearchGender(searchQuery);
+    if (speciesArray.includes(query)) {
+      onSearchSpecies(query);
+    } else if (statusArray.includes(query)) {
+      onSearchStatus(query);
+    } else if (genderArray.includes(query)) {
+      onSearchGender(query);
     } else {
-      onSearchName(searchQuery);
+      onSearchName(query);
     }
+  }, [
+    searchQuery,
+    onSearchName,
+    onSearchSpecies,
+    onSearchStatus,
+    onSearchGender,
+  ]);
+
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(event.target.value);
   };
 
   const renderPaginationNumbers = () => {
@@ -196,7 +242,7 @@ const Table: React.FC<IProps> = ({
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row justify-between sm:items-center pr-6 py-4">
+      <div className="flex flex-col sm:flex-row justify-between sm:items-center py-4">
         <div>
           <label htmlFor="table-search" className="sr-only">
             Search
@@ -209,16 +255,16 @@ const Table: React.FC<IProps> = ({
               type="text"
               id="table-search"
               className="block p-2 pl-10 text-sm text-gray-900 border border-gray-100 rounded-lg w-[400px] bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Search by name, status, gender and species"
+              placeholder="Name, status, gender or species"
               value={searchQuery}
               onChange={handleSearchChange}
             />
             <button
               onClick={handleSearchSubmit}
-              className="absolute right-0 px-4 py-2 text-sm text-white bg-gray-500 rounded-r-lg"
+              className="absolute right-0 px-4 py-2 text-sm text-white bg-sky-900 rounded-r-lg"
               aria-label="Submit Search"
             >
-              Submit
+              Search
             </button>
           </div>
         </div>
@@ -254,23 +300,98 @@ const Table: React.FC<IProps> = ({
                   </label>
                 </div>
               </th>
-              <th scope="col" className="px-6 py-3">
-                Full Name
+              <th
+                className="px-6 py-3 cursor-pointer"
+                onClick={() => handleSort("name")}
+              >
+                <div className="flex">
+                  Full Name
+                  {sortColumn === "name" && (
+                    <i
+                      className={`bi bi-arrow-${
+                        sortDirection === "asc" ? "up" : "down"
+                      } ms-2`}
+                    ></i>
+                  )}
+                </div>
               </th>
-              <th scope="col" className="px-6 py-3">
-                Status
+              <th
+                className="px-6 py-3 cursor-pointer w-32"
+                onClick={() => handleSort("status")}
+              >
+                <div className="flex">
+                  Status
+                  {sortColumn === "status" && (
+                    <i
+                      className={`bi bi-arrow-${
+                        sortDirection === "asc" ? "up" : "down"
+                      } ms-2`}
+                    ></i>
+                  )}
+                </div>
               </th>
-              <th scope="col" className="px-6 py-3">
-                Species
+              <th
+                className="px-6 py-3 cursor-pointer w-32"
+                onClick={() => handleSort("species")}
+              >
+                <div className="flex">
+                  Species
+                  {sortColumn === "species" && (
+                    <i
+                      className={`bi bi-arrow-${
+                        sortDirection === "asc" ? "up" : "down"
+                      } ms-2`}
+                    ></i>
+                  )}
+                </div>
               </th>
-              <th scope="col" className="px-6 py-3">
-                Origin
+              <th
+                scope="col"
+                className="px-6 py-3"
+                onClick={() => handleSort("origin.name")}
+              >
+                <div className="flex items-center">
+                  Origin
+                  {sortColumn === "origin.name" && (
+                    <i
+                      className={`bi bi-arrow-${
+                        sortDirection === "asc" ? "up" : "down"
+                      } ms-2`}
+                    />
+                  )}
+                </div>
               </th>
-              <th scope="col" className="px-6 py-3">
-                Location
+              <th
+                scope="col"
+                className="px-6 py-3"
+                onClick={() => handleSort("location.name")}
+              >
+                <div className="flex items-center">
+                  Location
+                  {sortColumn === "location.name" && (
+                    <i
+                      className={`bi bi-arrow-${
+                        sortDirection === "asc" ? "up" : "down"
+                      } ms-2`}
+                    />
+                  )}
+                </div>
               </th>
-              <th scope="col" className="px-6 py-3">
-                No Episodes
+              <th
+                scope="col"
+                className="px-6 py-3 "
+                onClick={() => handleSort("episode.length")}
+              >
+                <div className="flex items-center">
+                  No Episodes
+                  {sortColumn === "episode.length" && (
+                    <i
+                      className={`bi bi-arrow-${
+                        sortDirection === "asc" ? "up" : "down"
+                      } ms-2`}
+                    />
+                  )}
+                </div>
               </th>
               <th scope="col" className="px-6 py-3">
                 Action
@@ -278,8 +399,8 @@ const Table: React.FC<IProps> = ({
             </tr>
           </thead>
           <tbody>
-            {characters.length > 0 ? (
-              characters.map((character, index) => (
+            {sortedCharacters.length > 0 ? (
+              sortedCharacters.map((character, index) => (
                 <TableRow
                   key={character.id}
                   character={character}
