@@ -1,50 +1,34 @@
-# React + TypeScript + Vite
+# Thrive Protocol Task: Build a Responsive Dashboard with React
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This project involves creating a responsive dashboard using React. The dashboard is designed to adjust seamlessly across different screen sizes and provide a user-friendly interface for monitoring various data. The Public API used is: https://rickandmortyapi.com/.
 
-Currently, two official plugins are available:
+## Setup
+- <strong>React with Vite and Typescript</strong>
+- State management: <strong>Context API</strong>
+- Libraries: <strong>Tailwind CSS, Bootstrap Icons</strong>
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type aware lint rules:
-
-- Configure the top-level `parserOptions` property like this:
-
-```js
-export default tseslint.config({
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
-
-- Replace `tseslint.configs.recommended` to `tseslint.configs.recommendedTypeChecked` or `tseslint.configs.strictTypeChecked`
-- Optionally add `...tseslint.configs.stylisticTypeChecked`
-- Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and update the config:
-
-```js
-// eslint.config.js
-import react from 'eslint-plugin-react'
-
-export default tseslint.config({
-  // Set the react version
-  settings: { react: { version: '18.3' } },
-  plugins: {
-    // Add the react plugin
-    react,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended rules
-    ...react.configs.recommended.rules,
-    ...react.configs['jsx-runtime'].rules,
-  },
-})
-```
+## Features
+### Landing Page
+- Displays an introduction related to the dashboard.
+- Shows a list of favorite characters.
+- Favorite character IDs are stored in context, allowing for the retrieval of multiple characters based on those IDs.
+### Dashboard Page
+- Displays a table with fetched data about all characters and pagination.
+- Includes a search functionality at the top to filter characters by <strong>name, status, species, and gender.</strong>
+- Column headers are sortable too, click on column name and it will sort data in ascending or descending order.
+- Provides batch actions: Favorite, Edit, and Delete.
+   - <strong>Favorite:</strong> Stores the IDs of selected characters in context, which are then displayed on the landing page.
+   - <strong>Delete:</strong> Only disables or enables the table row, as the public API doesn't support character deletion.
+   - <strong>Edit:</strong> Redirects to the details page for the selected character.
+### Details Page
+- <strong>Navigation:</strong> Accessed by clicking "Edit Character" in the dashboard or "Learn More" from the favorite characters list on the landing page.
+- <strong>Profile Card:</strong>
+   - Displays the character's image and profile information.
+   - Includes two buttons at the end:
+   - <strong>Go to Dashboard:</strong> Returns to the main dashboard.
+   - <strong>Edit Profile:</strong> Opens a form to edit the character's profile data.
+   - <strong>Note:</strong> Updated data is stored only in context, as the public API does not support updates.
+- <strong>Episodes List:</strong>
+   - Below the profile card is a list of episodes the character appeared in.
+   - Episode numbers are extracted from the character's episode array and stored in a new array.
+   - The get multiple characters public API is used to fetch details for multiple episodes.
