@@ -50,10 +50,6 @@ const ProfileInformation: React.FC<IProps> = ({ profile }) => {
     setIsEditing(false);
   };
 
-  // if (!profile) {
-  //   return <div>No profile information available.</div>;
-  // }
-
   return (
     <div className="max-w-lg mx-auto bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden">
       {!isEditing && (
@@ -68,40 +64,40 @@ const ProfileInformation: React.FC<IProps> = ({ profile }) => {
         </div>
       )}
 
-        {isEditing ? (
-            <div className="text-center mt-6 px-6 pb-6">
+      {isEditing ? (
+        <div className="text-center mt-6 px-6 pb-6">
           <ProfileForm
             updatedProfile={updatedProfile}
             handleInputChange={handleInputChange}
             handleSave={handleSave}
             handleCancel={handleCancel}
           />
-          </div>
-        ) : (
-          <div className="text-center mt-12 px-6 pb-6">
-            <h2 className="text-2xl font-bold text-gray-800">
-              {updatedProfile.name}
-            </h2>
-            <p className="text-sm text-gray-500">Character Profile</p>
+        </div>
+      ) : (
+        <div className="text-center mt-12 px-6 pb-6">
+          <h2 className="text-2xl font-bold text-gray-800">
+            {updatedProfile.name}
+          </h2>
+          <p className="text-sm text-gray-500">Character Profile</p>
 
-            <div className="mt-4 space-y-2">
-              <ProfileText label="Species" value={updatedProfile.species} />
-              <ProfileText label="Gender" value={updatedProfile.gender} />
-              <ProfileText label="Status" value={updatedProfile.status} />
-              <ProfileText label="Origin" value={updatedProfile.origin.name} />
-              <ProfileText
-                label="Location"
-                value={updatedProfile.location.name}
-              />
-            </div>
-
-            <div className="mt-6 flex justify-center space-x-4">
-              <Button title="Back To Dashboard" onClick={goToDashboard} />
-              <Button title="Edit Profile" onClick={handleEdit} />
-            </div>
+          <div className="mt-4 space-y-2">
+            <ProfileText label="Species" value={updatedProfile.species} />
+            <ProfileText label="Gender" value={updatedProfile.gender} />
+            <ProfileText label="Status" value={updatedProfile.status} />
+            <ProfileText label="Origin" value={updatedProfile.origin.name} />
+            <ProfileText
+              label="Location"
+              value={updatedProfile.location.name}
+            />
           </div>
-        )}
-      </div>
+
+          <div className="mt-6 flex justify-center space-x-4">
+            <Button title="Back To Dashboard" onClick={goToDashboard} />
+            <Button title="Edit Profile" onClick={handleEdit} />
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

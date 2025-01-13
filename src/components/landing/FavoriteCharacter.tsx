@@ -1,6 +1,6 @@
-import React from 'react';
-import { ICharacter } from '../../types/ICharacter';
-import { Link } from 'react-router-dom';
+import React from "react";
+import { ICharacter } from "../../types/ICharacter";
+import NavLink from "../common/NavLink";
 
 interface IProps {
   character: ICharacter;
@@ -20,10 +20,11 @@ const FavoriteCharacter: React.FC<IProps> = ({ character }) => {
         </div>
       </div>
       <div className="p-4">
-
-        <div className="mt-1 flex justify-between items-center">
-        <Link to={`details/${character.id}`} className="text-sm font-bold text-gray-800 hover:text-sky-900 transition">Learn More</Link>
-        </div>
+        <NavLink
+          title="Learn More"
+          link={`details/${character.id}`}
+          className="text-sm font-bold text-gray-800 hover:text-sky-900 transition"
+        />
       </div>
     </div>
   );

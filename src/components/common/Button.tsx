@@ -14,7 +14,7 @@ const Button: React.FC<IProps> = ({ title, onClick, disabled = false, className 
       type={type} 
       onClick={onClick}
       disabled={disabled}
-      className={`inline-flex w-auto justify-center rounded-md bg-sky-900 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-sky-950 ${className}`} // Apply className prop here
+      className={`inline-flex w-auto justify-center rounded-md bg-sky-900 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-sky-950 ${className}`}
     >
       {title}
     </button>

@@ -8,6 +8,7 @@ import { IEpisode } from "../types/IEpisode";
 import Header from "../components/common/Header";
 import Footer from "../components/common/Footer";
 import LoadingSpinner from "../components/common/LoadingSpinner";
+import ErrorText from "../components/common/ErrorText";
 
 const Details: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -22,6 +23,8 @@ const Details: React.FC = () => {
       try {
         const characterData = await getCharacterById(id!);
         setCharacter(characterData);
+
+        // Fetch episodes for the character using an array that stores episode number from the url
         const episodeNumbers = characterData.episode.map((url: string) => {
           const parts = url.split("/");
           return parseInt(parts[parts.length - 1], 10);
@@ -49,12 +52,7 @@ const Details: React.FC = () => {
       <Header />
       <main className="flex-grow p-6 my-4">
         {error || !character ? (
-          <div className="max-w-7xl mx-auto text-center">
-            <div className="text-xl text-red-600 font-semibold">Error:</div>
-            <div className="text-center text-lg text-gray-700 mt-2">
-              {error || "Character not found"}
-            </div>
-          </div>
+          <ErrorText error={error || 'Character not found'} />
         ) : (
           <div className="max-w-7xl mx-auto text-center">
             <ProfileInformation profile={character} />

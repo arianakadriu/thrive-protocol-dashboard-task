@@ -5,6 +5,7 @@ import Table from "../components/dashboard/Table";
 import { getAllCharacters } from "../services/characters";
 import { ICharacters } from "../types/ICharacters";
 import LoadingSpinner from "../components/common/LoadingSpinner";
+import ErrorText from "../components/common/ErrorText";
 
 const Dashboard: React.FC = () => {
   const [characters, setCharacters] = useState<ICharacters>();
@@ -59,12 +60,7 @@ const Dashboard: React.FC = () => {
       <Header />
       <main className="flex-grow p-6">
       {error ? (
-          <div className="max-w-7xl mx-auto text-center">
-            <div className="text-xl text-red-600 font-semibold">Error:</div>
-            <div className="text-center text-lg text-gray-700 mt-2">
-              {error || "Data not found"}
-            </div>
-          </div>
+          <ErrorText error={error} />
         ) : (
         <div className="max-w-7xl mx-auto text-center">
           <Table

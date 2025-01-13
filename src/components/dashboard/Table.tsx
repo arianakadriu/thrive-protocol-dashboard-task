@@ -6,6 +6,8 @@ import { IPagination } from "../../types/IPagination";
 import TableRow from "../common/TableRow";
 import { useCharacterContext } from "../../context/CharacterContext";
 import Modal from "../common/Modal";
+import Search from "../common/Search";
+import TableHeader from "../common/TableHeader";
 
 interface IProps {
   characters: ICharacter[];
@@ -28,11 +30,7 @@ const Table: React.FC<IProps> = ({
   onSearchStatus,
   onSearchGender,
 }) => {
-  const {
-    // deleteRows,
-    favoriteRowsAction,
-    favoriteRows,
-  } = useCharacterContext();
+  const { favoriteRowsAction, favoriteRows } = useCharacterContext();
 
   const [selectedRows, setSelectedRows] = useState<boolean[]>(
     new Array(characters.length).fill(false)
@@ -44,10 +42,17 @@ const Table: React.FC<IProps> = ({
   const [isFavoriteModalOpen, setIsFavoriteModalOpen] = useState(false);
   const [isMultiFavoriteModalOpen, setIsMultiFavoriteModalOpen] =
     useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isMultiDeleteModalOpen, setIsMultiDeleteModalOpen] = useState(false);
   const [characterToFavorite, setCharacterToFavorite] = useState<number | null>(
     null
   );
+  const [characterToDelete, setCharacterToDelete] = useState<number | null>(
+    null
+  );
   const [disabledRows, setDisabledRows] = useState<number[]>([]);
+
+  // Arrays of grouped categories about species, gender and status
   const speciesArray: string[] = [
     "alien",
     "humanoid",
@@ -62,6 +67,7 @@ const Table: React.FC<IProps> = ({
   const statusArray: string[] = ["alive", "dead"];
   const navigate = useNavigate();
 
+  // Table Sort
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
 
@@ -107,10 +113,25 @@ const Table: React.FC<IProps> = ({
   };
 
   const deleteCharacter = (characterId?: number) => {
+    setCharacterToDelete(characterId ? characterId : null);
+    if (characterId) {
+      setIsDeleteModalOpen(true);
+    } else {
+      setIsMultiDeleteModalOpen(true);
+    }
+  };
+
+  const onDeleteModalCancel = () => {
+    setCharacterToDelete(null);
+    setIsDeleteModalOpen(false);
+    setIsMultiDeleteModalOpen(false);
+  };
+
+  const onDeleteModalConfirm = () => {
     let selectedCharacterIds: number[] = [];
 
-    if (characterId) {
-      selectedCharacterIds = [characterId];
+    if (characterToDelete) {
+      selectedCharacterIds = [characterToDelete];
     } else {
       selectedCharacterIds = characters
         .filter((_, index) => selectedRows[index])
@@ -134,10 +155,101 @@ const Table: React.FC<IProps> = ({
       setSelectedRows(new Array(characters.length).fill(false));
       setSelectAll(false);
     }
+
+    if (characterToDelete) {
+      setIsDeleteModalOpen(false);
+    } else {
+      setIsMultiDeleteModalOpen(false);
+    }
+  };
+
+  const favoriteCharacter = (characterId?: number) => {
+    setCharacterToFavorite(characterId ? characterId : null);
+    if (characterId) {
+      setIsFavoriteModalOpen(true);
+    } else {
+      setIsMultiFavoriteModalOpen(true);
+    }
   };
 
   const isFavorite = (characterId: number) => {
     return favoriteRows.includes(characterId);
+  };
+
+  // Modal title
+  const getFavoriteModalTitle = () => {
+    if (characterToFavorite && isFavorite(characterToFavorite)) {
+      return "Unfavorite";
+    }
+    return "Favorite";
+  };
+
+  const getMultiFavoriteModalTitle = () => {
+    const selectedCharacterIds = characters
+      .filter((_, index) => selectedRows[index])
+      .map((character) => character.id);
+
+    const allSelectedFavorited = selectedCharacterIds.every((id) =>
+      isFavorite(id)
+    );
+
+    if (allSelectedFavorited) {
+      return "Unfavorite";
+    }
+    return "Favorite";
+  };
+
+  const getDeleteModalTitle = () => {
+    if (
+      characterToDelete !== null &&
+      disabledRows.includes(characterToDelete)
+    ) {
+      return { action: "Undo", effect: "enable" };
+    }
+    return { action: "Delete", effect: "disable" };
+  };
+
+  const getMultiDeleteModalTitle = () => {
+    const selectedCharacterIds = characters
+      .filter((_, index) => selectedRows[index])
+      .map((character) => character.id);
+
+    const allSelectedInDelete = selectedCharacterIds.every((id) =>
+      disabledRows.includes(id)
+    );
+
+    if (allSelectedInDelete) {
+      return { action: "Undo", effect: "enable" };
+    }
+    return { action: "Delete", effect: "disable" };
+  };
+
+  const onFavoriteModalCancel = () => {
+    setCharacterToFavorite(null);
+    setIsFavoriteModalOpen(false);
+    setIsMultiFavoriteModalOpen(false);
+  };
+
+  const onFavoriteModalConfirm = () => {
+    let selectedCharacterIds: number[] = [];
+
+    if (characterToFavorite) {
+      selectedCharacterIds = [characterToFavorite];
+    } else {
+      selectedCharacterIds = characters
+        .filter((_, index) => selectedRows[index])
+        .map((character) => character.id);
+    }
+
+    if (selectedCharacterIds.length > 0) {
+      favoriteRowsAction(selectedCharacterIds);
+    }
+
+    if (characterToFavorite) {
+      setIsFavoriteModalOpen(false);
+    } else {
+      setIsMultiFavoriteModalOpen(false);
+    }
   };
 
   const handleSelectAll = () => {
@@ -156,11 +268,6 @@ const Table: React.FC<IProps> = ({
   };
 
   const selectedCount = selectedRows.filter(Boolean).length;
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    fetchPageData(page);
-  };
 
   const handleSearchSubmit = useCallback(() => {
     const query = searchQuery.trim().toLowerCase();
@@ -189,6 +296,12 @@ const Table: React.FC<IProps> = ({
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
+  };
+
+  // Pagination
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    fetchPageData(page);
   };
 
   const renderPaginationNumbers = () => {
@@ -230,93 +343,14 @@ const Table: React.FC<IProps> = ({
     paginationData?.count || 0
   );
 
-  const favoriteCharacter = (characterId?: number) => {
-    setCharacterToFavorite(characterId ? characterId : null);
-    if (characterId) {
-      setIsFavoriteModalOpen(true);
-    } else {
-      setIsMultiFavoriteModalOpen(true);
-    }
-  };
-
-  const getModalTitle = () => {
-    if (characterToFavorite && isFavorite(characterToFavorite)) {
-      return "Unfavorite";
-    }
-    return "Favorite";
-  };
-
-  const getMultiFavoriteModalTitle = () => {
-    const selectedCharacterIds = characters
-      .filter((_, index) => selectedRows[index])
-      .map((character) => character.id);
-
-    const allSelectedFavorited = selectedCharacterIds.every((id) =>
-      isFavorite(id)
-    );
-
-    if (allSelectedFavorited) {
-      return "Unfavorite";
-    }
-    return "Favorite";
-  };
-
-  const onFavoriteModalCancel = () => {
-    setCharacterToFavorite(null);
-    setIsFavoriteModalOpen(false);
-    setIsMultiFavoriteModalOpen(false);
-  };
-
-  const onFavoriteModalConfirm = () => {
-    let selectedCharacterIds: number[] = [];
-
-    if (characterToFavorite) {
-      selectedCharacterIds = [characterToFavorite];
-    } else {
-      selectedCharacterIds = characters
-        .filter((_, index) => selectedRows[index])
-        .map((character) => character.id);
-    }
-
-    if (selectedCharacterIds.length > 0) {
-      favoriteRowsAction(selectedCharacterIds);
-    }
-
-    if (characterToFavorite) {
-      setIsFavoriteModalOpen(false);
-    } else {
-      setIsMultiFavoriteModalOpen(false);
-    }
-  };
-
   return (
     <>
       <div className="flex flex-col sm:flex-row justify-between sm:items-center py-4">
-        <div>
-          <label htmlFor="table-search" className="sr-only">
-            Search
-          </label>
-          <div className="relative flex items-center">
-            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <i className="bi bi-search"></i>
-            </div>
-            <input
-              type="text"
-              id="table-search"
-              className="block p-2 pl-10 text-sm text-gray-900 border border-gray-100 rounded-lg w-[400px] bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-              placeholder="Name, status, gender or species"
-              value={searchQuery}
-              onChange={handleSearchChange}
-            />
-            <button
-              onClick={handleSearchSubmit}
-              className="absolute right-0 px-4 py-2 text-sm text-white bg-sky-900 rounded-r-lg"
-              aria-label="Submit Search"
-            >
-              Search
-            </button>
-          </div>
-        </div>
+        <Search
+          searchQuery={searchQuery}
+          onSearchChange={handleSearchChange}
+          onSearchSubmit={handleSearchSubmit}
+        />
 
         {selectedCount > 1 && (
           <div className="flex space-x-2 justify-center mt-2 sm:mt-0 sm:mr-6">
@@ -349,99 +383,51 @@ const Table: React.FC<IProps> = ({
                   </label>
                 </div>
               </th>
-              <th
-                className="px-6 py-3 cursor-pointer"
-                onClick={() => handleSort("name")}
-              >
-                <div className="flex">
-                  Full Name
-                  {sortColumn === "name" && (
-                    <i
-                      className={`bi bi-arrow-${
-                        sortDirection === "asc" ? "up" : "down"
-                      } ms-2`}
-                    ></i>
-                  )}
-                </div>
-              </th>
-              <th
-                className="px-6 py-3 cursor-pointer w-32"
-                onClick={() => handleSort("status")}
-              >
-                <div className="flex">
-                  Status
-                  {sortColumn === "status" && (
-                    <i
-                      className={`bi bi-arrow-${
-                        sortDirection === "asc" ? "up" : "down"
-                      } ms-2`}
-                    ></i>
-                  )}
-                </div>
-              </th>
-              <th
-                className="px-6 py-3 cursor-pointer w-32"
-                onClick={() => handleSort("species")}
-              >
-                <div className="flex">
-                  Species
-                  {sortColumn === "species" && (
-                    <i
-                      className={`bi bi-arrow-${
-                        sortDirection === "asc" ? "up" : "down"
-                      } ms-2`}
-                    ></i>
-                  )}
-                </div>
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-3"
-                onClick={() => handleSort("origin.name")}
-              >
-                <div className="flex items-center">
-                  Origin
-                  {sortColumn === "origin.name" && (
-                    <i
-                      className={`bi bi-arrow-${
-                        sortDirection === "asc" ? "up" : "down"
-                      } ms-2`}
-                    />
-                  )}
-                </div>
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-3"
-                onClick={() => handleSort("location.name")}
-              >
-                <div className="flex items-center">
-                  Location
-                  {sortColumn === "location.name" && (
-                    <i
-                      className={`bi bi-arrow-${
-                        sortDirection === "asc" ? "up" : "down"
-                      } ms-2`}
-                    />
-                  )}
-                </div>
-              </th>
-              <th
-                scope="col"
-                className="px-6 py-3 "
-                onClick={() => handleSort("episode.length")}
-              >
-                <div className="flex items-center">
-                  No Episodes
-                  {sortColumn === "episode.length" && (
-                    <i
-                      className={`bi bi-arrow-${
-                        sortDirection === "asc" ? "up" : "down"
-                      } ms-2`}
-                    />
-                  )}
-                </div>
-              </th>
+              <TableHeader
+                column="name"
+                label="Full Name"
+                sortColumn={sortColumn}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+              />
+              <TableHeader
+                column="status"
+                label="Status"
+                sortColumn={sortColumn}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+                className="w-32"
+              />
+              <TableHeader
+                column="species"
+                label="Species"
+                sortColumn={sortColumn}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+                className="w-32"
+              />
+              <TableHeader
+                column="origin.name"
+                label="Origin"
+                sortColumn={sortColumn}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+              />
+              <TableHeader
+                column="location.name"
+                label="Location"
+                sortColumn={sortColumn}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+              />
+              <TableHeader
+                column="episode.length"
+                label="No Episodes"
+                sortColumn={sortColumn}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+                className="w-48"
+              />
               <th scope="col" className="px-6 py-3">
                 Action
               </th>
@@ -518,8 +504,8 @@ const Table: React.FC<IProps> = ({
         </nav>
         <Modal
           isOpen={isFavoriteModalOpen}
-          title={`${getModalTitle()} Character`}
-          description={`Are you sure you want to ${getModalTitle().toLowerCase()} this character?`}
+          title={`${getFavoriteModalTitle()} Character`}
+          description={`Are you sure you want to ${getFavoriteModalTitle().toLowerCase()} this character?`}
           onClose={onFavoriteModalCancel}
           onConfirm={onFavoriteModalConfirm}
         />
@@ -529,6 +515,24 @@ const Table: React.FC<IProps> = ({
           description={`Are you sure you want to ${getMultiFavoriteModalTitle().toLowerCase()} these characters?`}
           onClose={onFavoriteModalCancel}
           onConfirm={onFavoriteModalConfirm}
+        />
+        <Modal
+          isOpen={isDeleteModalOpen}
+          title={`${getDeleteModalTitle().action} Character`}
+          description={`Are you sure you want to ${getDeleteModalTitle().action.toLowerCase()} this character? This action will ${
+            getDeleteModalTitle().effect
+          }  the row.`}
+          onClose={onDeleteModalCancel}
+          onConfirm={onDeleteModalConfirm}
+        />
+        <Modal
+          isOpen={isMultiDeleteModalOpen}
+          title={`${getMultiDeleteModalTitle().action} Characters`}
+          description={`Are you sure you want to ${getMultiDeleteModalTitle().action.toLowerCase()} these characters? This action will ${
+            getMultiDeleteModalTitle().effect
+          } the row.`}
+          onClose={onDeleteModalCancel}
+          onConfirm={onDeleteModalConfirm}
         />
       </div>
     </>

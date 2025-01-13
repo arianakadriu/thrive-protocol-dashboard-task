@@ -1,11 +1,10 @@
 import React, { createContext, useContext, useState, ReactNode } from "react";
-import { ICharacter } from "../types/ICharacter"; // Ensure you have the correct type for ICharacter
+import { ICharacter } from "../types/ICharacter";
 
 interface CharacterContextType {
   characters: ICharacter[];
   setCharacters: (characters: ICharacter[]) => void;
   favoriteRows: number[];
-  deleteRows: (ids: number[]) => void;
   favoriteRowsAction: (ids: number[]) => void;
   profile: ICharacter;
   updateProfile: (profile: ICharacter) => void;
@@ -27,15 +26,11 @@ interface CharacterProviderProps {
 
 export const CharacterProvider: React.FC<CharacterProviderProps> = ({ children }) => {
   const [characters, setCharacters] = useState<ICharacter[]>([]);
-  const [favoriteRows, setFavoriteRows] = useState<number[]>([]); // Track favorite rows
+  const [favoriteRows, setFavoriteRows] = useState<number[]>([]);
   const [profile, setProfile] = useState<ICharacter>({} as ICharacter);
 
   const updateProfile = (updatedProfile: ICharacter) => {
     setProfile(updatedProfile);
-  };
-
-  const deleteRows = (ids: number[]) => {
-    setCharacters((prev) => prev.filter((character) => !ids.includes(character.id)));
   };
 
   const favoriteRowsAction = (ids: number[]) => {
@@ -60,7 +55,6 @@ export const CharacterProvider: React.FC<CharacterProviderProps> = ({ children }
         profile, 
         updateProfile,
         favoriteRows,
-        deleteRows,
         favoriteRowsAction,
       }}
     >
