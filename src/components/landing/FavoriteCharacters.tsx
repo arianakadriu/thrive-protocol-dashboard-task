@@ -24,7 +24,8 @@ const FavoriteCharacters: React.FC = () => {
       const getFavoriteCharacters = async () => {
         try {
           const characterData = await getMultipleCharacters(favoriteRows);
-          setCharacters(characterData);
+          const formatedData = Array.isArray(characterData) ? characterData : [characterData]
+          setCharacters(formatedData);
         } catch (error) {
           setError(`Failed to load Characters: ${error}`);
         } finally {
@@ -78,7 +79,6 @@ const FavoriteCharacters: React.FC = () => {
               <FavoriteCharacter key={character.id} character={character} />
             ))}
           </div>
-          
           <ItemsPagination
             currentPage={currentPage}
             totalPages={totalPages}
