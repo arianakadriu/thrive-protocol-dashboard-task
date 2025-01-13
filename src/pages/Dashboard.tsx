@@ -9,7 +9,7 @@ import ErrorText from "../components/common/ErrorText";
 
 const Dashboard: React.FC = () => {
   const [characters, setCharacters] = useState<ICharacters>();
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [pageNumber, setPageNumber] = useState<number>(1);
   const [searchFilters, setSearchFilters] = useState({
@@ -20,7 +20,6 @@ const Dashboard: React.FC = () => {
   });
 
   useEffect(() => {
-    setLoading(true);
     const fetchCharacters = async () => {
       try {
         const charactersData = await getAllCharacters({

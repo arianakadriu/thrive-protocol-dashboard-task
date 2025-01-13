@@ -46,9 +46,9 @@ const TableRow: React.FC<IProps> = ({
           </label>
         </div>
       </td>
-      <th
+      <td
         scope="row"
-        className="flex items-center px-6 py-4 text-gray-900 whitespace-nowrap dark:text-white"
+        className="flex items-center px-6 py-4 text-gray-900 whitespace-wrap dark:text-white"
       >
         <img
           className="w-10 h-10 rounded-full"
@@ -56,10 +56,10 @@ const TableRow: React.FC<IProps> = ({
           alt={character.name}
         />
         <div className="pl-3">
-          <div className="text-base font-semibold">{character.name}</div>
-          <div className="font-normal text-gray-500">{character.gender}</div>
+        <div className="text-base font-semibold break-words">{character.name}</div>
+        <div className="font-normal text-gray-500">{character.gender}</div>
         </div>
-      </th>
+      </td>
       <td className="px-6 py-4">{character.status}</td>
       <td className="px-6 py-4">{character.species}</td>
       <td className="px-6 py-4">
