@@ -1,6 +1,7 @@
 # Thrive Protocol Task: Build a Responsive Dashboard with React
 
-This project involves creating a responsive dashboard using React. The dashboard is designed to adjust seamlessly across different screen sizes and provide a user-friendly interface for monitoring various data. The Public API used is: https://rickandmortyapi.com/.
+This project involves creating a responsive dashboard using React. The dashboard is designed to adjust seamlessly across different screen sizes and provide a user-friendly interface for monitoring various data. The Public API used is: [API](https://rickandmortyapi.com/). Click [here](https://thrive-protocol-dashboard-task.vercel.app/) to see the project deployed on Vercel.
+
 
 ## Setup
 - <strong>React with Vite and Typescript</strong>
